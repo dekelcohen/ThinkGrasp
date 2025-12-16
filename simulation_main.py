@@ -422,17 +422,27 @@ if __name__ == "__main__":
                 }
 
                 try:
-                    # Call OpenAI API
-                    response = client.chat.completions.create(
-                        model="gpt-4o-2024-05-13",
-                        messages=messages,
-                        temperature=0,
-                        max_tokens=713,
-                        top_p=1,
-                        frequency_penalty=0,
-                        presence_penalty=0
-                    )
-                    output = response.choices[0].message.content
+                    from azure_openai import call_llm
+                    USE_AZURE_OPENAI = os.getenv("USE_AZURE_OPENAI", "true").lower() == "true"
+                    if USE_AZURE_OPENAI:
+                        # Azure OpenAI path
+                        output = call_llm(
+                            messages=messages,
+                            azure_deployment_model = 'gpt-5',
+                            max_tokens=40000                            
+                        )
+                    else:
+                        # Call OpenAI API
+                        response = client.chat.completions.create(
+                            model="gpt-4o-2024-05-13",
+                            messages=messages,
+                            temperature=0,
+                            max_tokens=713,
+                            top_p=1,
+                            frequency_penalty=0,
+                            presence_penalty=0
+                        )
+                        output = response.choices[0].message.content
                     # Output API response
                     logging.info(output)
                     result = process_grasping_result(output)
