@@ -159,14 +159,15 @@ def crop_pointcloud(pcd, cropping_box, color_image, depth_image, workspace_limit
 
     return full_pcd
 
-def visualize_cropping_box(image, cropping_box):
+def visualize_cropping_box(image, cropping_box, iteration, logger):
     # Visualize the cropping box on the image
     x1, y1, x2, y2 = cropping_box
     plt.figure()
     plt.imshow(image)
     plt.gca().add_patch(plt.Rectangle((x1, y1), x2-x1, y2-y1, edgecolor='red', facecolor='none'))
     plt.title("Cropping Box Visualization")
-    plt.show()
+    plt.savefig(os.path.join(logger.visualizations_directory, f"{iteration:06d}.cropping_box.png"))
+    plt.close()
 
 
 
@@ -328,7 +329,7 @@ if __name__ == "__main__":
                     break
 
 
-                color_image, depth_image, mask_image = utils.get_true_heightmap(env)
+                color_image, depth_image, mask_image, color_raw, depth_raw = utils.get_true_heightmap(env)
 
 
 
@@ -487,7 +488,7 @@ if __name__ == "__main__":
                     cropping_box = create_cropping_box_from_boxes(boxes_list,
                                                                   (color_image.shape[1], color_image.shape[0]))
 
-                    visualize_cropping_box(color_image, cropping_box)
+                    visualize_cropping_box(color_image, cropping_box, iteration, logger)
                     ray.get(langsam_actor.save.remote(masks, boxes, phrases, logits, image_pil))
                     bbox_images, bbox_positions = utils.convert_output(image_pil, boxes, phrases, logits, color_image, depth_image, mask_image, preferred_grasping_location)
 
@@ -521,6 +522,7 @@ if __name__ == "__main__":
                     remain_bbox_images, bboxes, pos_bboxes, grasps = utils.preprocess(bbox_images, bbox_positions, grasp_pose_set, (args.patch_size, args.patch_size))
                     logger.save_bbox_images(iteration, remain_bbox_images)
                     logger.save_heightmaps(iteration, color_image, depth_image)
+                    logger.save_images(iteration, color_raw, depth_raw)
                     if bboxes == None:
                         break
 
@@ -591,5 +593,12 @@ if __name__ == "__main__":
                     "avg_reward": avg_reward
                 })
 
+
+    from debug.dbg_utils import create_video_from_images
+    try:
+        if iteration > 0:
+            create_video_from_images(logger.images_directory, base_name='color', start_idx=0, end_idx=iteration-1, fps=10)
+    except Exception as e:
+        print(f"Failed to create video: {e}")
 
     ray.shutdown()

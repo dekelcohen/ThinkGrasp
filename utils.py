@@ -148,14 +148,14 @@ def get_true_heightmap(env):
     """Get RGB-D orthographic heightmaps and segmentation masks in simulation."""
 
     # Capture near-orthographic RGB-D images and segmentation masks.
-    color, depth, segm = env.render_camera(env.oracle_cams[0])
+    color_raw, depth_raw, segm = env.render_camera(env.oracle_cams[0])
 
     # Combine color with masks for faster processing.
-    color = np.concatenate((color, segm[Ellipsis, None]), axis=2)
+    color = np.concatenate((color_raw, segm[Ellipsis, None]), axis=2)
 
     # Reconstruct real orthographic projection from point clouds.
     hmaps, cmaps = reconstruct_heightmaps(
-        [color], [depth], env.oracle_cams, env.bounds, env.pixel_size
+        [color], [depth_raw], env.oracle_cams, env.bounds, env.pixel_size
     )
 
     # Split color back into color and masks.
@@ -171,7 +171,7 @@ def get_true_heightmap(env):
 
     # For the mask, ensure it's in the correct format and range if needed
     imageio.imwrite('mask.png', mask)
-    return cmap, hmap, mask
+    return cmap, hmap, mask, color_raw, depth_raw
 
 
 def get_heightmap_from_real_image(color, depth, segm, env):

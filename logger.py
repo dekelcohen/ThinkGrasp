@@ -28,6 +28,9 @@ class Logger:
         self.depth_heightmaps_directory = os.path.join(
             self.base_directory, "data", "depth-heightmaps"
         )
+        self.images_directory = os.path.join(
+            self.base_directory, "data", "images"
+        )
         self.bbox_heightmaps_directory = os.path.join(
             self.base_directory, "data", "bbox-heightmaps"
         )
@@ -47,6 +50,8 @@ class Logger:
             os.makedirs(self.color_heightmaps_directory)
         if not os.path.exists(self.depth_heightmaps_directory):
             os.makedirs(self.depth_heightmaps_directory)
+        if not os.path.exists(self.images_directory):
+            os.makedirs(self.images_directory)
         if not os.path.exists(self.bbox_heightmaps_directory):
             os.makedirs(self.bbox_heightmaps_directory)
         if not os.path.exists(self.mask_directory):
@@ -78,6 +83,20 @@ class Logger:
         cv2.imwrite(
             os.path.join(self.depth_heightmaps_directory, "%06d.depth.png" % (iteration)),
             depth_heightmap,
+        )
+    
+    def save_images(self, iteration, color_image, depth_image):
+        color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(
+            os.path.join(self.images_directory, "color_%d.png" % (iteration)),
+            color_image,
+        )
+        depth_image = np.round(depth_image * 100000).astype(
+            np.uint16
+        )  # Save depth in 1e-5 meters
+        cv2.imwrite(
+            os.path.join(self.images_directory, "depth_%d.png" % (iteration)),
+            depth_image,
         )
     
     def save_bbox_images(self, iteration, bbox_images):
