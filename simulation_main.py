@@ -285,7 +285,7 @@ if __name__ == "__main__":
     num_episode = args.num_episode
 
     # load environment
-    env = Environment(gui=True)
+    env = Environment(gui=False) # DIRECT in headless server
     env.seed(args.seed)
     # load logger
     logger = Logger(case_dir=args.testing_case_dir)

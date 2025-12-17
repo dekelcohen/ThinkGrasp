@@ -95,4 +95,4 @@ if __name__ == "__main__":
     }]
     response = call_llm(messages, azure_deployment_model = 'gpt-5')
     # Handle the response as needed (e.g., print or process)
-    print(response.json())
+    print(response)
