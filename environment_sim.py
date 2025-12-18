@@ -412,7 +412,7 @@ class Environment:
 
     def _step(self, capture: bool = True):
         """Wrapper for pb.stepSimulation() with optional frame capture."""
-        self._step()
+        pb.stepSimulation()
         if capture:
             try:
                 self._maybe_capture_frame()
