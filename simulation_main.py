@@ -21,15 +21,15 @@ from langsam.langsam_actor import LangSAM
 from logger import Logger
 from grasp_detetor import Graspnet
 # from VLP.new_vlp_actor import SegmentAnythingActor
-from openai import OpenAI
+#from openai import OpenAI # Disabled OpenAI due to a strange bug
 
 import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-api_key = os.environ["OPENAI_API_KEY"]
-client = OpenAI(api_key=api_key)
+#api_key = os.environ["OPENAI_API_KEY"]
+#client = OpenAI(api_key=api_key)
 
 
 def select_action(bboxes, pos_bboxes, text, actions, evaluate=True):
