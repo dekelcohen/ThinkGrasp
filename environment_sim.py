@@ -691,8 +691,8 @@ class Environment:
             diff_joints = target_joints - current_joints
             if all(np.abs(diff_joints) < 0.05):
                 # give time to stop
-                  for _ in range(5):
-                      self._step(capture=False)
+                for _ in range(5):
+                  self._step(capture=False)
                 return True
 
             # Move with constant velocity
