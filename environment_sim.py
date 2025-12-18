@@ -673,7 +673,7 @@ class Environment:
     def go_home(self):
         return self.move_joints(self.home_joints)
 
-    def move_joints(self, target_joints, speed=0.01, timeout=3):
+    def move_joints(self, target_joints, speed=0.01, timeout=6):
         """Move UR5e to target joint configuration."""
         t0 = time.time()
         while (time.time() - t0) < timeout:
