@@ -406,8 +406,9 @@ class Environment:
         if self._last_capture_time == 0.0 or (now - self._last_capture_time) >= self._capture_interval:
             try:                
                 self.frame_capture_callback()
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Exception in frame_capture_callback: {e}")
+                
             self._last_capture_time = now
 
     def render_camera_fast(self, config):
@@ -453,12 +454,8 @@ class Environment:
     def _step(self, capture: bool = True):
         """Wrapper for pb.stepSimulation() with optional frame capture."""        
         pb.stepSimulation()        
-        if capture:
-            try:                
-                self._maybe_capture_frame()                
-            except Exception:
-                pass
-        
+        if capture:            
+            self._maybe_capture_frame()
 
     def render_camera(self, config):
         """Render RGB-D image with specified camera configuration."""

@@ -1,3 +1,4 @@
+import time
 import argparse
 import json
 import logging
@@ -474,8 +475,7 @@ if __name__ == "__main__":
                     result = process_grasping_result(output)
                     print_grasping_result(result)
                     with open('grasping_result_log.json', 'w') as log_file:
-                        json.dump(result, log_file, indent=4)
-                    print({"gpt4o_output": output})
+                        json.dump(result, log_file, indent=4)                    
                 except Exception as e:
                     logging.error(f"Error with OpenAI API request: {e}")
 
