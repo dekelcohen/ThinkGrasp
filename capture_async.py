@@ -56,6 +56,7 @@ class AsyncImageWriter:
         item = (base_name, rgb, idx)
         try:
             self.q.put(item, block=False)
+            print('*** inserted to Q:')
             return True
         except Full:
             if self.drop_newest:
@@ -75,6 +76,7 @@ class AsyncImageWriter:
             except Empty:
                 continue
             try:
+                print('*** q.get returned a cap-image')
                 # Convert RGB -> BGR for OpenCV encoders
                 bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
                 if self.codec == "jpg" or self.codec == "jpeg":
