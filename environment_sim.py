@@ -412,12 +412,17 @@ class Environment:
 
     def _step(self, capture: bool = True):
         """Wrapper for pb.stepSimulation() with optional frame capture."""
+        t0 = time.time()
         pb.stepSimulation()
+        
         if capture:
             try:
+                t1 = time.time()
                 self._maybe_capture_frame()
+                print('_maybe_capture_frame duration:', time.time() - t1)
             except Exception:
                 pass
+        print('_step duration:', time.time() - t0)
 
     def render_camera(self, config):
         """Render RGB-D image with specified camera configuration."""
@@ -673,7 +678,7 @@ class Environment:
     def go_home(self):
         return self.move_joints(self.home_joints)
 
-    def move_joints(self, target_joints, speed=0.01, timeout=6):
+    def move_joints(self, target_joints, speed=0.01, timeout=3):
         """Move UR5e to target joint configuration."""
         t0 = time.time()
         while (time.time() - t0) < timeout:
