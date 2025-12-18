@@ -689,10 +689,6 @@ class Environment:
                 # give time to stop
                 for _ in range(5):
                     pb.stepSimulation()
-                    try:
-                        self._maybe_capture_frame()
-                    except Exception:
-                        pass
                 return True
 
             # Move with constant velocity
@@ -707,10 +703,6 @@ class Environment:
                 positionGains=np.ones(len(self.ur5e_joints)),
             )
             pb.stepSimulation()
-            try:
-                self._maybe_capture_frame()
-            except Exception:
-                pass
         print(f"Warning: move_joints exceeded {timeout} second timeout. Skipping.")
         return False
 
