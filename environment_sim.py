@@ -158,7 +158,7 @@ class Environment:
         while (time.time() - t0) < timeout:
             if self.is_static:
                 return True
-            self._step()
+            self._step(capture=False)
         print(f"Warning: Wait static exceeded {timeout} second timeout. Skipping.")
         return False
 
