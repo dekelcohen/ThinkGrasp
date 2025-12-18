@@ -305,8 +305,12 @@ if __name__ == "__main__":
 
     def _capture_observer():
         # Upper oblique view (fast RGB-only render)
+        t0 = time.time()
         color_u = env.render_camera_fast(env.observer_cams[0])
+        print('render_camera_fast duration:', time.time() - t0)
+        t1 = time.time()
         writer.offer("observer_upper", color_u, idx=observer_frame_idx["upper"])
+        print('writer.offer duration:', time.time() - t1)
         observer_frame_idx["upper"] += 1
 
     env.enable_frame_capture(_capture_observer, fps=8.0)
