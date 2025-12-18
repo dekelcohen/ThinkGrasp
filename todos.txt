@@ -1,0 +1,35 @@
+Likely causes span perception, grasp scoring/selection, and physics/control. Here are the highest‑impact ones with code hotspots to check.
+
+  Perception / Point Cloud
+
+  - Incorrect crop bounds in utils.get_and_process_data can clip or misplace the ROI.
+      - utils.py:187 sets xmax=480, ymax=640 for a 480x640 image; width/height are swapped. Use xmax=640, ymax=480 and clamp to image dims. This can starve the
+        point cloud or bias it left.
+  - Naive image→workspace mapping in simulation_main.py:101 crop_pointcloud(...) ignores camera intrinsics; points become “pixels with z”, not metric world
+    coordinates. GraspNet will then score/pose on a corrupted cloud.
+  - Depth units/scale mismatches. utils.get_true_heightmap returns depth in meters from PyBullet; CameraInfo in utils.py:170 uses scale=1000.0. Verify the
+    expected depth units for create_point_cloud_from_depth_image to avoid mm/m confusion.
+
+  Grasp Generation / Filtering
+
+  - Tight thresholds filter out good grasps:
+      - grasp_detetor.py:32 uses dist_thresh=0.05 (5 cm) and angle_thresh=15° cone. If objects are larger or cluttered, you’ll get few valid grasps and may
+        fall back to worse ones.
+
+  Physics / Control
+
+  - Insufficient friction/force or object dynamics:
+      - environment_sim.py:429 sets finger pad lateralFriction=0.9. Heavy/smooth objects may slip; increase pad/object friction or gripper closing force.
+  - Approach path/tip offset:
+      - environment_sim.py:396–416 transforms pose to the EE tip and subtracts 0.02 on Z. If the approach vector is off or Z is too low, you hit the table or
+        object edges.
+  - IK and straight‑line motion:
+      - environment_sim.py:296 and environment_sim.py:319 perform IK and straight moves with a force threshold; premature stop or bad IK can miss alignment.
+
+  Segmentation / Targeting
+
+  - Avoid simulation_main.py:101 crop_pointcloud for grasping; build clouds via utils.create_point_cloud_from_depth_image and correct intrinsics.
+  - Tune physics:
+      - Increase gripper pad/object friction, closing force, and reduce angle_thresh if you want more top‑down grasps.
+  - Validate units:
+      - Ensure depth scale matches CameraInfo and PyBullet outputs; inspect a few sampled points for metric consistency.
