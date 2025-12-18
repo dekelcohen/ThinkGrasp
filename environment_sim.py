@@ -837,14 +837,19 @@ class Environment:
         min_pos_dist = None
         self.open_gripper()
         success = self.move_joints(self.ik_rest_joints)
+        print(f"[grasp] move_joints(ik_rest_joints): {success}")
         if success:
             success = self.move_ee_pose((over, rot))
+            print(f"[grasp] move_ee_pose(over): {success}")
         if success:
             success = self.straight_move(over, pos, rot, speed, detect_force=True)
+            print(f"[grasp] straight_move(over->pos, detect_force=True): {success}")
         if success:
             self.close_gripper()
             success = self.straight_move(pos, over, rot, speed)
+            print(f"[grasp] straight_move(pos->over): {success}")
             success &= self.is_gripper_closed
+            print(f"[grasp] is_gripper_closed AND: {success}")
             
             if success: # get grasp object id
                 max_height = -0.0001
@@ -861,6 +866,7 @@ class Environment:
 
         if success:
             success = self.move_joints(self.drop_joints1)
+            print(f"[grasp] move_joints(drop_joints1): {success}")
             # success &= self.is_gripper_closed
             self.open_gripper(is_slow=True)
         self.go_home()
