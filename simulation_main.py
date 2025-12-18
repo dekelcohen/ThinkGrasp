@@ -301,20 +301,20 @@ if __name__ == "__main__":
     logger = Logger(case_dir=args.testing_case_dir)
 
     # Enable 8 fps observer-camera recording via async writer
-    observer_frame_idx = {"upper": 0}
+    observer_frame_idx = {"side": 0}
     writer = AsyncImageWriter(out_dir=logger.images_directory, codec="jpg", quality=90, max_queue=256)
 
     def _capture_observer():
         # Upper oblique view (fast RGB-only render)
         t0 = time.time()
         color_u = env.render_camera_fast(env.observer_cams[1])
-        #print('render_camera_fast duration:', time.time() - t0)
+        print('render_camera_fast duration:', time.time() - t0)
         t1 = time.time()
-        writer.offer("observer_upper", color_u, idx=observer_frame_idx["upper"])
+        writer.offer("observer_side", color_u, idx=observer_frame_idx["side"])
         #print('writer.offer duration:', time.time() - t1)
-        observer_frame_idx["upper"] += 1
+        observer_frame_idx["side"] += 1
 
-    env.enable_frame_capture(_capture_observer, fps=8.0)
+    env.enable_frame_capture(_capture_observer, fps=2.0)
     # load graspnet
     graspnet = Graspnet()
 
