@@ -5,6 +5,7 @@ from queue import Queue, Full, Empty
 
 import cv2
 import numpy as np
+from typing import Optional
 
 
 class AsyncImageWriter:
@@ -33,7 +34,7 @@ class AsyncImageWriter:
         self._worker = threading.Thread(target=self._run, daemon=True)
         self._worker.start()
 
-    def offer(self, base_name: str, rgb: np.ndarray, ts: float | None = None, idx: int | None = None) -> bool:
+    def offer(self, base_name: str, rgb: np.ndarray, ts: Optional[float] = None, idx: Optional[int] = None) -> bool:
         """Offer a frame to be written asynchronously.
 
         Args:
@@ -99,4 +100,3 @@ class AsyncImageWriter:
         self._stop = True
         if wait:
             self._worker.join()
-
