@@ -264,7 +264,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    wandb.init(project="robotic-grasping1.0")
+    # wandb.init(project="robotic-grasping1.0")
     ray.init(num_gpus=1) 
     use_gpu = torch.cuda.is_available()
     gpu_allocation = 1 if use_gpu else 0
@@ -465,7 +465,7 @@ if __name__ == "__main__":
                     print_grasping_result(result)
                     with open('grasping_result_log.json', 'w') as log_file:
                         json.dump(result, log_file, indent=4)
-                    wandb.log({"gpt4o_output": output})
+                    print({"gpt4o_output": output})
                 except Exception as e:
                     logging.error(f"Error with OpenAI API request: {e}")
 
@@ -555,9 +555,7 @@ if __name__ == "__main__":
                     iteration += 1
                     episode_steps += 1
                     episode_reward += reward
-                    print("\033[034m Episode: {}, step: {}, reward: {}\033[0m".format(episode, episode_steps, round(reward, 2)))
-                    wandb.log({"episode": episode, "step": episode_steps, "reward": reward})
-
+                    print("\033[034m Episode: {}, step: {}, reward: {}\033[0m".format(episode, episode_steps, round(reward, 2)))                    
                     if episode_steps == args.max_episode_step:
                         break
 
@@ -600,7 +598,7 @@ if __name__ == "__main__":
                 print("\033[034m Language goal: {}, average steps: {}/{}, average reward: {}, average success: {}\033[0m".format(lang_goal, avg_step, avg_success_step, avg_reward, avg_success))
                 logging.info(
                     f"Language goal: {lang_goal}, average steps: {avg_step}/{avg_success_step}, average reward: {avg_reward}, average success: {avg_success}")
-                wandb.log({
+                print({
                     "lang_goal": lang_goal,
                     "avg_success": avg_success,
                     "avg_step": avg_step,
