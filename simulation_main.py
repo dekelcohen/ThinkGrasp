@@ -303,8 +303,7 @@ if __name__ == "__main__":
     observer_frame_idx = {"upper": 0}
     writer = AsyncImageWriter(out_dir=logger.images_directory, codec="jpg", quality=90, max_queue=256)
 
-    def _capture_observer():
-        print('**** Enter _capture_observer')
+    def _capture_observer():        
         # Upper oblique view
         color_u, depth_u, _ = utils.p.render_camera(env, env.observer_cams[0]) if False else env.render_camera(env.observer_cams[0])
         writer.offer("observer_upper", color_u, idx=observer_frame_idx["upper"])
@@ -605,13 +604,7 @@ if __name__ == "__main__":
                 print("\033[034m Language goal: {}, average steps: {}/{}, average reward: {}, average success: {}\033[0m".format(lang_goal, avg_step, avg_success_step, avg_reward, avg_success))
                 logging.info(
                     f"Language goal: {lang_goal}, average steps: {avg_step}/{avg_success_step}, average reward: {avg_reward}, average success: {avg_success}")
-                print({
-                    "lang_goal": lang_goal,
-                    "avg_success": avg_success,
-                    "avg_step": avg_step,
-                    "avg_success_step": avg_success_step,
-                    "avg_reward": avg_reward
-                })
+                
 
 
     from debug.dbg_utils import create_video_from_images

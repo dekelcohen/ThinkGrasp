@@ -158,7 +158,7 @@ class Environment:
         while (time.time() - t0) < timeout:
             if self.is_static:
                 return True
-            pb.stepSimulation()
+            self._step()
         print(f"Warning: Wait static exceeded {timeout} second timeout. Skipping.")
         return False
 
@@ -380,12 +380,7 @@ class Environment:
 
         # Step simulator asynchronously until objects settle.
         while not self.is_static:
-            pb.stepSimulation()
-            # Allow optional frame capture at a fixed rate
-            try:
-                self._maybe_capture_frame()
-            except Exception:
-                pass
+            self._step()
 
         return reward, done
 
@@ -406,16 +401,23 @@ class Environment:
 
     def _maybe_capture_frame(self):
         if not self.frame_capture_callback or self._capture_interval <= 0.0:            
-            return
-        print('**** _maybe_capture_frame: after initial checks')    
+            return        
         now = time.time()
         if self._last_capture_time == 0.0 or (now - self._last_capture_time) >= self._capture_interval:
-            try:
-                print('**** _maybe_capture_frame: before self.frame_capture_callback()')    
+            try:                
                 self.frame_capture_callback()
             except Exception:
                 pass
             self._last_capture_time = now
+
+    def _step(self, capture: bool = True):
+        """Wrapper for pb.stepSimulation() with optional frame capture."""
+        self._step()
+        if capture:
+            try:
+                self._maybe_capture_frame()
+            except Exception:
+                pass
 
     def render_camera(self, config):
         """Render RGB-D image with specified camera configuration."""
@@ -644,7 +646,7 @@ class Environment:
 
         # give time to stop
         for _ in range(5):
-            pb.stepSimulation()
+            self._step(capture=False)
 
         return success, self.lang_goal
 
@@ -689,8 +691,8 @@ class Environment:
             diff_joints = target_joints - current_joints
             if all(np.abs(diff_joints) < 0.05):
                 # give time to stop
-                for _ in range(5):
-                    pb.stepSimulation()
+                  for _ in range(5):
+                      self._step(capture=False)
                 return True
 
             # Move with constant velocity
@@ -704,7 +706,7 @@ class Environment:
                 targetPositions=step_joints,
                 positionGains=np.ones(len(self.ur5e_joints)),
             )
-            pb.stepSimulation()
+            self._step()
         print(f"Warning: move_joints exceeded {timeout} second timeout. Skipping.")
         return False
 
@@ -872,7 +874,7 @@ class Environment:
                 physicsClientId=self._client_id,
             )
             for _ in range(10):
-                pb.stepSimulation()
+                self._step(capture=True)
             while (time.time() - t0) < timeout:
                 current_angle = pb.getJointState(self.ee, self.gripper_main_joint)[0]
                 diff_angle = abs(current_angle - prev_angle)
@@ -880,7 +882,7 @@ class Environment:
                     break
                 prev_angle = current_angle
                 for _ in range(10):
-                    pb.stepSimulation()
+                    self._step(capture=True)
         # maintain the angles
         pb.setJointMotorControl2(
             self.ee,
@@ -897,4 +899,4 @@ class Environment:
             force=3.1,
         )
         for _ in range(10):
-            pb.stepSimulation()
+            self._step(capture=True)
