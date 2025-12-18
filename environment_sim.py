@@ -405,11 +405,13 @@ class Environment:
         self._last_capture_time = 0.0
 
     def _maybe_capture_frame(self):
-        if not self.frame_capture_callback or self._capture_interval <= 0.0:
+        if not self.frame_capture_callback or self._capture_interval <= 0.0:            
             return
+        print('**** _maybe_capture_frame: after initial checks')    
         now = time.time()
         if self._last_capture_time == 0.0 or (now - self._last_capture_time) >= self._capture_interval:
             try:
+                print('**** _maybe_capture_frame: before self.frame_capture_callback()')    
                 self.frame_capture_callback()
             except Exception:
                 pass
