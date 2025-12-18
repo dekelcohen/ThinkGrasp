@@ -303,9 +303,9 @@ if __name__ == "__main__":
     observer_frame_idx = {"upper": 0}
     writer = AsyncImageWriter(out_dir=logger.images_directory, codec="jpg", quality=90, max_queue=256)
 
-    def _capture_observer():        
-        # Upper oblique view
-        color_u, depth_u, _ = utils.p.render_camera(env, env.observer_cams[0]) if False else env.render_camera(env.observer_cams[0])
+    def _capture_observer():
+        # Upper oblique view (fast RGB-only render)
+        color_u = env.render_camera_fast(env.observer_cams[0])
         writer.offer("observer_upper", color_u, idx=observer_frame_idx["upper"])
         observer_frame_idx["upper"] += 1
 

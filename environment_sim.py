@@ -410,6 +410,46 @@ class Environment:
                 pass
             self._last_capture_time = now
 
+    def render_camera_fast(self, config):
+        """Fast RGB-only render for static observer cameras.
+
+        - Uses ER_BULLET_HARDWARE_OPENGL as requested.
+        - Disables segmentation and skips depth conversion for speed.
+        """
+        lookdir = np.float32([0, 0, 1]).reshape(3, 1)
+        updir = np.float32([0, -1, 0]).reshape(3, 1)
+        rotation = pb.getMatrixFromQuaternion(config["rotation"])
+        rotm = np.float32(rotation).reshape(3, 3)
+        lookdir = (rotm @ lookdir).reshape(-1)
+        updir = (rotm @ updir).reshape(-1)
+        lookat = config["position"] + lookdir
+        focal_len = config["intrinsics"][0, 0]
+        znear, zfar = config["zrange"]
+        viewm = pb.computeViewMatrix(config["position"], lookat, updir)
+        fovh = (config["image_size"][0] / 2) / focal_len
+        fovh = 180 * np.arctan(fovh) * 2 / np.pi
+        aspect_ratio = config["image_size"][1] / config["image_size"][0]
+        projm = pb.computeProjectionMatrixFOV(fovh, aspect_ratio, znear, zfar)
+
+        _, _, color, _, _ = pb.getCameraImage(
+            width=config["image_size"][1],
+            height=config["image_size"][0],
+            viewMatrix=viewm,
+            projectionMatrix=projm,
+            shadow=0,
+            flags=0,
+            renderer=pb.ER_BULLET_HARDWARE_OPENGL,
+        )
+
+        color_image_size = (config["image_size"][0], config["image_size"][1], 4)
+        color = np.array(color, dtype=np.uint8).reshape(color_image_size)
+        color = color[:, :, :3]
+        if config.get("noise", False):
+            color = np.int32(color)
+            color += np.int32(self._random.normal(0, 3, color.shape))
+            color = np.uint8(np.clip(color, 0, 255))
+        return color
+
     def _step(self, capture: bool = True):
         """Wrapper for pb.stepSimulation() with optional frame capture."""
         t0 = time.time()
