@@ -264,6 +264,14 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    # Install a debugger hook to break on unhandled exceptions
+    import sys, traceback, pdb
+    def _pdb_excepthook(exc_type, exc_value, exc_tb):
+        try:
+            traceback.print_exception(exc_type, exc_value, exc_tb)
+        finally:
+            pdb.post_mortem(exc_tb)
+    sys.excepthook = _pdb_excepthook
     # wandb.init(project="robotic-grasping1.0")
     ray.init(num_gpus=1) 
     use_gpu = torch.cuda.is_available()
