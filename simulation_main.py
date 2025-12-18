@@ -289,6 +289,21 @@ if __name__ == "__main__":
     env.seed(args.seed)
     # load logger
     logger = Logger(case_dir=args.testing_case_dir)
+
+    # Enable 10 fps observer-camera recording for human-friendly videos
+    observer_frame_idx = {"upper": 0, "side": 0}
+
+    def _capture_observer():
+        # Upper oblique view
+        color_u, depth_u, _ = utils.p.render_camera(env, env.observer_cams[0]) if False else env.render_camera(env.observer_cams[0])
+        logger.save_rgb(observer_frame_idx["upper"], color_u, base_name="observer_upper")
+        observer_frame_idx["upper"] += 1
+        # Side view
+        color_s, depth_s, _ = env.render_camera(env.observer_cams[1])
+        logger.save_rgb(observer_frame_idx["side"], color_s, base_name="observer_side")
+        observer_frame_idx["side"] += 1
+
+    env.enable_frame_capture(_capture_observer, fps=10.0)
     # load graspnet
     graspnet = Graspnet()
 
@@ -598,6 +613,12 @@ if __name__ == "__main__":
     try:
         if iteration > 0:
             create_video_from_images(logger.images_directory, base_name='color', start_idx=0, end_idx=iteration-1, fps=10)
+        # Observer videos (upper and side)
+        if 'observer_frame_idx' in locals():
+            if observer_frame_idx.get('upper', 0) > 0:
+                create_video_from_images(logger.images_directory, base_name='observer_upper', start_idx=0, end_idx=observer_frame_idx['upper']-1, fps=10)
+            if observer_frame_idx.get('side', 0) > 0:
+                create_video_from_images(logger.images_directory, base_name='observer_side', start_idx=0, end_idx=observer_frame_idx['side']-1, fps=10)
     except Exception as e:
         print(f"Failed to create video: {e}")
 

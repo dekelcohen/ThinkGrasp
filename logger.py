@@ -107,6 +107,20 @@ class Logger:
                 bbox_image,
             )
 
+    def save_rgb(self, iteration, color_image, base_name: str = "color"):
+        """Save an RGB image with a custom base name.
+
+        Args:
+            iteration (int): frame index.
+            color_image (np.ndarray): RGB image in range 0-255.
+            base_name (str): filename prefix, e.g. 'observer_upper'.
+        """
+        color_bgr = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(
+            os.path.join(self.images_directory, f"{base_name}_{iteration}.png"),
+            color_bgr,
+        )
+
     def write_to_log(self, log_name, log):
         np.savetxt(
             os.path.join(self.transitions_directory, "%s.log.txt" % log_name), log, delimiter=" "

@@ -23,6 +23,7 @@ class Environment:
         self.obj_ids = {"fixed": [], "rigid": []}
         self.agent_cams = cameras.RealSenseD435.CONFIG
         self.oracle_cams = cameras.Oracle.CONFIG
+        self.observer_cams = cameras.Observer.CONFIG
         self.bounds = WORKSPACE_LIMITS
         self.home_joints = np.array([0, -0.8, 0.5, -0.2, -0.5, 0]) * np.pi
         self.ik_rest_joints = np.array([0, -0.5, 0.5, -0.5, -0.5, 0]) * np.pi
@@ -39,6 +40,11 @@ class Environment:
             pb.resetDebugVisualizerCamera(
                 cameraDistance=1.5, cameraYaw=90, cameraPitch=-25, cameraTargetPosition=target,
             )
+        # Frame capture (optional): set by enable_frame_capture()
+        self.frame_capture_callback = None
+        self._capture_interval = 0.0
+        self._last_capture_time = 0.0
+
         self._initialized = True
 
 
@@ -375,12 +381,39 @@ class Environment:
         # Step simulator asynchronously until objects settle.
         while not self.is_static:
             pb.stepSimulation()
+            # Allow optional frame capture at a fixed rate
+            try:
+                self._maybe_capture_frame()
+            except Exception:
+                pass
 
         return reward, done
 
     def seed(self, seed=None):
         self._random = np.random.RandomState(seed)
         return seed
+
+    def enable_frame_capture(self, callback, fps=10.0):
+        """Enable periodic frame capture during simulation steps.
+
+        Args:
+            callback: zero-arg callable to capture and save frames.
+            fps: desired frames per second (<=0 disables capture).
+        """
+        self.frame_capture_callback = callback
+        self._capture_interval = (1.0 / fps) if (callback and fps and fps > 0) else 0.0
+        self._last_capture_time = 0.0
+
+    def _maybe_capture_frame(self):
+        if not self.frame_capture_callback or self._capture_interval <= 0.0:
+            return
+        now = time.time()
+        if self._last_capture_time == 0.0 or (now - self._last_capture_time) >= self._capture_interval:
+            try:
+                self.frame_capture_callback()
+            except Exception:
+                pass
+            self._last_capture_time = now
 
     def render_camera(self, config):
         """Render RGB-D image with specified camera configuration."""
@@ -656,6 +689,10 @@ class Environment:
                 # give time to stop
                 for _ in range(5):
                     pb.stepSimulation()
+                    try:
+                        self._maybe_capture_frame()
+                    except Exception:
+                        pass
                 return True
 
             # Move with constant velocity
@@ -670,6 +707,10 @@ class Environment:
                 positionGains=np.ones(len(self.ur5e_joints)),
             )
             pb.stepSimulation()
+            try:
+                self._maybe_capture_frame()
+            except Exception:
+                pass
         print(f"Warning: move_joints exceeded {timeout} second timeout. Skipping.")
         return False
 

@@ -109,3 +109,43 @@ class Oracle:
             "noise": False,
         }
     ]
+
+
+class Observer:
+    """Observer cameras for human-friendly views including the robot arm.
+
+    Provides two fixed viewpoints:
+    - Upper oblique: back/upper angle that captures the arm and table.
+    - Side: lateral angle to show approach and grasp clearly.
+    """
+
+    # Reuse D435 intrinsics and resolution for consistency.
+    image_size = RealSenseD435.image_size
+    intrinsics = RealSenseD435.intrinsics
+
+    # Upper oblique view (behind/above the workspace, looking down toward table + arm)
+    upper_position = (0.8, 0.0, 1.1)
+    upper_rotation = p.getQuaternionFromEuler((np.pi / 5, np.pi, -np.pi / 2))
+
+    # Side view (left side, slightly elevated, angled toward workspace)
+    side_position = (0.2, -0.8, 0.6)
+    side_rotation = p.getQuaternionFromEuler((np.pi / 6, np.pi, 3 * np.pi / 4))
+
+    CONFIG = [
+        {
+            "image_size": image_size,
+            "intrinsics": intrinsics,
+            "position": upper_position,
+            "rotation": upper_rotation,
+            "zrange": (0.01, 10.0),
+            "noise": False,
+        },
+        {
+            "image_size": image_size,
+            "intrinsics": intrinsics,
+            "position": side_position,
+            "rotation": side_rotation,
+            "zrange": (0.01, 10.0),
+            "noise": False,
+        },
+    ]
