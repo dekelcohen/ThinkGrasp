@@ -451,18 +451,14 @@ class Environment:
         return color
 
     def _step(self, capture: bool = True):
-        """Wrapper for pb.stepSimulation() with optional frame capture."""
-        t0 = time.time()
-        pb.stepSimulation()
-        
+        """Wrapper for pb.stepSimulation() with optional frame capture."""        
+        pb.stepSimulation()        
         if capture:
-            try:
-                t1 = time.time()
-                self._maybe_capture_frame()
-                print('_maybe_capture_frame duration:', time.time() - t1)
+            try:                
+                self._maybe_capture_frame()                
             except Exception:
                 pass
-        print('_step duration:', time.time() - t0)
+        
 
     def render_camera(self, config):
         """Render RGB-D image with specified camera configuration."""
